@@ -61,10 +61,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     const result = await fetch(url, {
         headers: {
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36",
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
-            'Access-Control-Allow-Headers': 'Authorization, Content-Type'
-
         }
     }).then(res => res.json());
     console.log(JSON.stringify(result));
