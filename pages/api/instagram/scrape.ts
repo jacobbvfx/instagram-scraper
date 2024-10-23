@@ -22,8 +22,8 @@ interface ResponseData {
 // Function to handle CORS
 function setCORSHeaders(res: NextApiResponse) {
     res.setHeader('Access-Control-Allow-Origin', '*'); // Zezwól na dostęp z dowolnej domeny, możesz to zmienić na konkretną domenę
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS'); // Zezwól na określone metody HTTP
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // Zezwól na określone nagłówki
+    res.setHeader('Access-Control-Allow-Methods', 'POST'); // Zezwól na określone metody HTTP
+    res.setHeader('Access-Control-Allow-Headers', 'content-type'); // Zezwól na określone nagłówki
 }
 
 // Default export of the Next.js API route handler
