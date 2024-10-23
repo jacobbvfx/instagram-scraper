@@ -1,14 +1,3 @@
-/**
- * @file scrape.post.ts
- * @date 01-Sep-2024
- * @author Senthilnathan Karuppaiah
- * 
- * @description 
- * This Next.js API route scrapes posts from an Instagram profile using the Instagram GraphQL API.
- * It fetches the posts, processes the image data to base64, and returns the data in JSON format.
- * The API expects the profile ID and the number of posts to fetch as input.
- */
-
 import dayjs from 'dayjs';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -30,8 +19,23 @@ interface ResponseData {
     result?: any;
 }
 
+// Function to handle CORS
+function setCORSHeaders(res: NextApiResponse) {
+    res.setHeader('Access-Control-Allow-Origin', '*'); // Zezwól na dostęp z dowolnej domeny, możesz to zmienić na konkretną domenę
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS'); // Zezwól na określone metody HTTP
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // Zezwól na określone nagłówki
+}
+
 // Default export of the Next.js API route handler
 export default async (req: NextApiRequest, res: NextApiResponse) => {
+    // Set CORS headers
+    setCORSHeaders(res);
+
+    // Handle OPTIONS preflight request
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+
     // Extracting profile_id and the number of posts to fetch (first) from the request body
     const { profile_id, first } = req.body;
 
