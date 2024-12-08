@@ -19,23 +19,11 @@ interface ResponseData {
     result?: any;
 }
 
-// Function to handle CORS
-function setCORSHeaders(res: NextApiResponse) {
-    res.setHeader('Access-Control-Allow-Origin', '*'); // Zezwól na dostęp z dowolnej domeny, możesz to zmienić na konkretną domenę
-    res.setHeader('Access-Control-Allow-Methods', 'POST'); // Zezwól na określone metody HTTP
-    res.setHeader('Access-Control-Allow-Headers', 'content-type'); // Zezwól na określone nagłówki
-}
+// Simple in-memory cache to store requests and responses
+const cache = new Map<string, { timestamp: number, data: ResponseData }>();
 
 // Default export of the Next.js API route handler
 export default async (req: NextApiRequest, res: NextApiResponse) => {
-    // Set CORS headers
-    setCORSHeaders(res);
-
-    // Handle OPTIONS preflight request
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
-    }
-
     // Extracting profile_id and the number of posts to fetch (first) from the request body
     const { profile_id, first } = req.body;
 
@@ -47,14 +35,24 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         });
     }
 
+    // Set default value for 'first' to 10 if it's null or undefined
+    const numberOfPosts = first ?? 10;
+    const cacheKey = `${profile_id}:${numberOfPosts}`;
+
+    // Check cache for existing data
+    const cachedData = cache.get(cacheKey);
+
+    // If cached data exists and it's less than 12 hours old, return it
+    if (cachedData && (Date.now() - cachedData.timestamp) < 12 * 60 * 60 * 1000) {
+        console.log("Returning cached data");
+        return res.status(200).json(cachedData.data);
+    }
+
     // Array to store the processed Instagram posts
     let posts: InstagramPost[] = [];
 
     // Object to store the response data
     let response: ResponseData = {} as ResponseData;
-
-    // Set default value for 'first' to 10 if it's null or undefined
-    const numberOfPosts = first ?? 10;
 
     // Constructing the URL using template literals to include the profile ID and the number of posts
     const url = `https://www.instagram.com/graphql/query/?query_id=17888483320059182&variables={"id":"${profile_id}","first":${numberOfPosts},"after":null}`;
@@ -68,6 +66,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         }
     }).then(res => res.json());
     console.log(JSON.stringify(result));
+
     // Storing the number of posts retrieved and the total count of posts
     response.first = result.data.user.edge_owner_to_timeline_media.edges.length;
     response.total = result.data.user.edge_owner_to_timeline_media.count;
@@ -106,6 +105,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Attach the processed posts to the response object
     response.result = posts;
+
+    // Store the response in the cache with the current timestamp
+    cache.set(cacheKey, { timestamp: Date.now(), data: response });
 
     // Return the response with status 200 (OK)
     return res.status(200).json(response);
