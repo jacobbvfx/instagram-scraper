@@ -24,6 +24,16 @@ const cache = new Map<string, { timestamp: number, data: ResponseData }>();
 
 // Default export of the Next.js API route handler
 export default async (req: NextApiRequest, res: NextApiResponse) => {
+    // Manually set CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');  // Allow any origin
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST');  // Allow specific methods
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');  // Allow specific headers
+
+    // If the request method is OPTIONS, return a 200 response for pre-flight requests
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+
     // Extracting profile_id and the number of posts to fetch (first) from the request body
     const { profile_id, first } = req.body;
 
