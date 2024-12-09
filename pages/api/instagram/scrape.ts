@@ -53,7 +53,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     const cachedData = cache.get(cacheKey);
 
     // If cached data exists and it's less than 12 hours old, return it
-    if (cachedData && (Date.now() - cachedData.timestamp) < 12 * 60 * 60 * 1000) {
+    if (cachedData && (Date.now() - cachedData.timestamp) < 24 * 60 * 60 * 1000) {
         console.log("Returning cached data");
         return res.status(200).json(cachedData.data);
     }
